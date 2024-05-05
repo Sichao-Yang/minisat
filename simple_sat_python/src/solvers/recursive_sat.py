@@ -21,6 +21,9 @@ def solve(instance, watchlist, assignment, d, verbose):
             print('Trying {} = {}'.format(instance.variables[d], a),
                   file=stderr)
         assignment[d] = a
+        # false literal is calculated as d<<1 | a:
+        # if we assign var to true(a=1), (d<<1 | a) will set
+        # the false_literal to ~var based on the literal encoding rule: var<<1 | negate_sign.
         if update_watchlist(instance,
                             watchlist,
                             (d << 1) | a,

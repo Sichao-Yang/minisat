@@ -41,7 +41,11 @@ def update_watchlist(instance,
         found_alternative = False
         for alternative in clause:
             v = alternative >> 1
-            a = alternative & 1
+            a = alternative & 1     # if a=1, means there is a negate sign for this variable
+            # assignment set 0 as var=false and 1 as var=true, but in literal encoding 
+            # we assign var as 0 if there is no negate sign and 1 if there is, so here we use xor to check
+            # whether the literal in clause has been assigned to true:
+            # (if ~var:=true(assginment[v]=0) and ~var in clause(a=1), assignment[v] == a ^ 1 will evaluate to true)
             if assignment[v] is None or assignment[v] == a ^ 1:
                 found_alternative = True
                 del watchlist[false_literal][0]
