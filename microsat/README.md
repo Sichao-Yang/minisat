@@ -2,7 +2,7 @@ copied from: [microsat](https://github.com/marijnheule/microsat)
 
 Compile using:
 
-  gcc microsat.c -O2 -DSTANDALONE -o microsat
+  gcc microsat.c -O0 -g -DSTANDALONE -o microsat
 
 Use as follows:
 

@@ -209,7 +209,7 @@ void initCDCL (struct solver* S, int n, int m) {
     S->first[i] = S->first[-i] = END; }                    // and first (watch pointers).
   S->head = n; }                                           // Initialize the head of the double-linked list
 
-static void read_until_new_line (FILE * input) {
+static void read_until_new_line (FILE* input) {
   int ch; while ((ch = getc (input)) != '\n')
     if (ch == EOF) { printf ("parse error: unexpected EOF"); exit (1); } }
 
@@ -217,9 +217,13 @@ int parse (struct solver* S, char* filename) {                            // Par
   int tmp; FILE* input = fopen (filename, "r");                           // Read the CNF file
   while ((tmp = getc (input)) == 'c') read_until_new_line (input);
   ungetc (tmp, input);
-  do { tmp = fscanf (input, " p cnf %i %i \n", &S->nVars, &S->nClauses);  // Find the first non-comment line
-    if (tmp > 0 && tmp != EOF) break; tmp = fscanf (input, "%*s\n"); }    // In case a commment line was found
-  while (tmp != 2 && tmp != EOF);                                         // Skip it and read next line
+  do {
+      tmp = fscanf(input, " p cnf %i %i \n", &S->nVars, &S->nClauses);
+      // Find the first non-comment line
+      if (tmp > 0 && tmp != EOF)
+          break;
+      tmp = fscanf(input, "%*s\n"); // In case a comment line was found, skip it
+  } while (tmp != 2 && tmp != EOF); // Skip it and read the next line
 
   initCDCL (S, S->nVars, S->nClauses);                     // Allocate the main datastructures
   int nZeros = S->nClauses, size = 0;                      // Initialize the number of clauses to read
@@ -231,7 +235,7 @@ int parse (struct solver* S, char* filename) {                            // Par
     int lit = 0; tmp = fscanf (input, " %i ", &lit);       // Read a literal.
     if (tmp == EOF) {
       printf ("s parse error: header incorrect\n"); exit (0); }
-    if (!lit) {                                            // If reaching the end of the clause
+    if (!lit) {                                            // If reaching the end of the clause, lit=0, so !lit=1
       int* clause = addClause (S, S->buffer, size, 1);     // Then add the clause to data_base
       if (!size || ((size == 1) && S->false[clause[0]]))   // Check for empty clause or conflicting unit
         return UNSAT;                                      // If either is found return UNSAT

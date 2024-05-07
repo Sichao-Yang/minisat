@@ -1,3 +1,10 @@
+# Done
+
+- simple_sat_python
+- SAT-SOLVER-DPLL: 它的literal的正负号也是用2*l+0/1来encode的.
+- SAT-SOLVER-CDCL: 它的variable就是encode后的literal. 和上面的initializaiton不太一样.
+
+
 # Understanding [MiniSAT](http://minisat.se/)
 
 入门可以先看下CMU大佬[marijn heule](https://www.cs.cmu.edu/~mheule/)写的[microsat](https://github.com/marijnheule/microsat), 然后来看minisat.
