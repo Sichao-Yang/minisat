@@ -123,14 +123,14 @@ void SATSolverDPLL::initialize()
       cin >> literal;
       if (literal > 0) // if the variable has positive polarity
       {
-        formula.clauses[i].push_back(2 * (literal - 1)); // store it in the form 2n
+        formula.clauses[i].push_back(2 * (literal - 1)); // store it in the form 2(n-1)
         // increment frequency and polarity of the literal
         formula.literal_frequency[literal - 1]++;
         formula.literal_polarity[literal - 1]++;
       }
       else if (literal < 0) // if the variable has negative polarity
       {
-        formula.clauses[i].push_back(2 * ((-1) * literal - 1) + 1); // store it in the form 2n+1
+        formula.clauses[i].push_back(2 * ((-1) * literal - 1) + 1); // store it in the form 2(n-1)+1
         // increment frequency and decrement polarity of the literal
         formula.literal_frequency[-1 - literal]++;
         formula.literal_polarity[-1 - literal]--;
@@ -244,14 +244,14 @@ int SATSolverDPLL::apply_transform(Formula &f, int literal_to_apply)
  */
 int SATSolverDPLL::DPLL(Formula f)
 {
-  int result = unit_propagate(f); // perform unit propagation on the formula
-  if (result == RetVal::satisfied)   // if formula satisfied, show result and return
+  int result = unit_propagate(f);  // perform unit propagation on the formula
+  if (result == RetVal::satisfied) // if formula satisfied, show result and return
   {
     show_result(f, result);
     return RetVal::satisfied;
   }
   else if (result == RetVal::unsatisfied) // if formula not satisfied in this
-                                       // branch, return normally
+                                          // branch, return normally
   {
     return RetVal::unsatisfied;
   }
@@ -275,18 +275,18 @@ int SATSolverDPLL::DPLL(Formula f)
     }
     new_f.literal_frequency[i] = -1;                  // reset the frequency to -1 to ignore in the future
     int transform_result = apply_transform(new_f, i); // apply the change to all the clauses
-    if (transform_result == RetVal::satisfied)           // if formula satisfied, show result and return
+    if (transform_result == RetVal::satisfied)        // if formula satisfied, show result and return
     {
       show_result(new_f, transform_result);
       return RetVal::satisfied;
     }
     else if (transform_result == RetVal::unsatisfied) // if formula not satisfied
-                                                   // in this branch, return
-                                                   // normally
+                                                      // in this branch, return
+                                                      // normally
     {
       continue;
     }
-    int dpll_result = DPLL(new_f);     // recursively call DPLL on the new formula
+    int dpll_result = DPLL(new_f);        // recursively call DPLL on the new formula
     if (dpll_result == RetVal::satisfied) // return the result, if satisfied
     {
       return dpll_result;
@@ -341,7 +341,7 @@ void SATSolverDPLL::solve()
   if (result == RetVal::unsatisfied)
   {
     show_result(formula, RetVal::unsatisfied); // the argument formula is a dummy
-                                            // here, the result is UNSAT
+                                               // here, the result is UNSAT
   }
 }
 

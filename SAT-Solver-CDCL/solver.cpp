@@ -394,7 +394,7 @@ int SATSolverCDCL::conflict_analysis_and_backtrack(int decision_level)
         }
       }
     }
-    // exactly one literal at the same decision level means we have a UIP
+    // exactly one literal at the same decision level means we already have a UIP
     if (this_level_count == 1)
     {
       break;

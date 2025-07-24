@@ -1,1 +1,4 @@
 __pycache__
+microsat/microsat
+SAT-Solver-CDCL/solver
+SAT-Solver-DPLL/solver
