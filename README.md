@@ -2,9 +2,10 @@
 
 - simple_sat_python
 - SAT-SOLVER-DPLL & SAT-SOLVER-CDCL: 
-- - var的正负号也是用2*(v-1)+0/1来encode的. 它的variable的assignment是存在f.literals向量里的，命名上有点奇怪. 
-- - 且这两个solver里对f.literals的元素（一个var）赋值定义是相反的（cdcl里0代表 !a, 1代表 a; dpll 相反）
+- - var的正负号也是用2*(v-1)+0/1来encode的. 它的variable的assignment是存在f.literals向量里的，命名上有点奇怪；
+- - 且这两个solver里对f.literals的元素（一个var）赋值定义是相反的（cdcl里0代表 !a, 1代表 a; dpll 相反）；
 - - CDCL里implement的不是1st ULP，而是更简单的lastULP，也就是它不需要找单个ULP，每次直接对当前decision level的所有implied vars做resolve；
+- - 这两个做unit propogate的时候都没用two literals watchlist；
 
 
 # Understanding [MiniSAT](http://minisat.se/)
