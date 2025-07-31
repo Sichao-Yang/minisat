@@ -60,7 +60,7 @@ inline Lit operator~(Lit p)
     q.x = p.x ^ 1;
     return q;
 } // 5 -> 4, 4 -> 5
-inline bool sign(Lit p) { return p.x & 1; }     // sign=true means its a not literal
+inline bool sign(Lit p) { return p.x & 1; }     // sign=true means its a neg literal
 inline int var(Lit p) { return p.x >> 1; }
 inline int index(Lit p) { return p.x; } // A "toInt" method that guarantees small, positive integers suitable for array indexing.
 inline Lit toLit(int i)

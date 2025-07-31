@@ -8,10 +8,12 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/minisat_debug",
-            "args": ["${workspaceFolder}/examples/h1.cnf", "log"],
+            "program": "${workspaceFolder}/minisat_1.14/minisat_debug",
+            "args": [
+                "${workspaceFolder}/minisat_1.14/examples/h1.cnf",
+            ],
             "stopAtEntry": true,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/minisat_1.14",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -28,6 +30,5 @@
                 }
             ]
         }
-
     ]
 }

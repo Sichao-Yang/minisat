@@ -163,14 +163,14 @@ template <class B> static void readClause(B &in, Solver &S, vec<Lit> &lits)
     lits.clear();
     for (;;)
     {
-        parsed_lit = parseInt(in);
+        parsed_lit = parseInt(in);  // input: '-1', parsed_lit: -1
         if (parsed_lit == 0)
             break;
-        var = abs(parsed_lit) - 1; //  -1 -> 0, 5 -> 4
+        var = abs(parsed_lit) - 1; //  -1 -> var0, 5 -> var4
         while (var >= S.nVars())
             S.newVar();
         lits.push((parsed_lit > 0) ? Lit(var)
-                                   : ~Lit(var)); // even number represents positive lit, odd for neg lit, lit is 2*var
+                                   : ~Lit(var)); // lit.x 2*var+sgn, "-1" -> 2*0+1=1
     }
 }
 

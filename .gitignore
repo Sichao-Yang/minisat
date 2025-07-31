@@ -1,4 +1,5 @@
 __pycache__
-microsat/microsat
 SAT-Solver-CDCL/solver
 SAT-Solver-DPLL/solver
+minisat_1.14/minisat_debug
+log

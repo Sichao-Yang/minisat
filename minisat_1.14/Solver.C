@@ -106,8 +106,8 @@ void Solver::newClause(const vec<Lit> &ps_, bool learnt)
             ok = false;
     }
     else if (ps.size() == 2)
-    {
-        // Create special binary clause watch:
+    {   // watch的都是这个clause里的literal的反，但凡反为真了那正必为假，需要watch别的literal
+        // Create special binary clause watch: 这是特殊情况，因为只有两个literals所以不需要都加
         // (0, 5) -> {w[1]=[c(5)], w[4]=[c(0)]}, meaning if lit 0 is assigned to be true, clause in watchlist [~0] will
         // be checked and (in this case) propogated
         watches[index(~ps[0])].push(GClause_new(ps[1]));
@@ -279,7 +279,7 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
         Clause &c = confl.isLit() ? ((*analyze_tmpbin)[1] = confl.lit(), *analyze_tmpbin) : *confl.clause();
         if (c.learnt())
             claBumpActivity(&c);
-        // p starts with lit_Undef but after reason it will not be undefined
+        // p starts with lit_Undef but after reason it will not be undefined 当p被赋值的时候其实就是开始做resolve了，第0个是需要被resolve的那个当前d level上的trail最后的那个literal，所以这里跳过的意思就是说明它已经被跳过了
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++)
         {
             Lit q = c[j];
@@ -289,7 +289,7 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
                 seen[var(q)] = 1;
                 // var from current decision level is not added to outlearnt clause, unless its the UIP
                 if (level[var(q)] == decisionLevel())
-                    pathC++;
+                    pathC++; // 如果不是当前d level的被赋值的var就不会++，resolve step也就少一次
                 else
                 { // get backjump level, lowest on the tree (or max on the trail)
                     out_learnt.push(q);
@@ -306,13 +306,13 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
         p = trail[index + 1]; // add 1 here is just to be compatible with 'index--'
         // var(p) can only take one value when enqueued, therefore reason's size is |var| not |lit|
         confl = reason[var(p)];
-        // set back to zero why?
+        // set back to zero why? 因为这个p就相当于会被消掉了
         seen[var(p)] = 0;
-        pathC--; // everytime, a falsified var is removed by tracing its opposite value (unit propogated) on trail
+        pathC--; // everytime, a falsified var is removed by tracing its opposite value (unit propogated) on trail，如果只有一个falsified var了，那就已经到达UIP了，这边--后就会等于0，达到退出条件
         // once all causal lits from level above expect one(unit propogated from current level) are found,
         // the loop terminates with the last UIP saved in p
     } while (pathC > 0);
-    out_learnt[0] = ~p; // reverse this lit to void future conflict
+    out_learnt[0] = ~p; // reverse this lit to void future conflict，uip的点需要被翻转，才能避免下次再犯
 
     int i, j;
     if (expensive_ccmin)
@@ -332,7 +332,7 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
     else
     {
         // Simplify conflict clause (a little):
-        //
+        // 论文里提到的conflict clause minimization
         out_learnt.copyTo(analyze_toclear);
         for (i = j = 1; i < out_learnt.size(); i++)
         {
@@ -342,9 +342,9 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
             else if (r.isLit())
             {
                 Lit q = r.lit();
-                if (!seen[var(q)] && level[var(q)] != 0)
-                    out_learnt[j++] = out_learnt[i];
-            }
+                if (!seen[var(q)] && level[var(q)] != 0)    // ~seen就相当于不subsume，就不化简这个literal
+                    out_learnt[j++] = out_learnt[i]; // 如果没有进这个if里 j就不能++，就消掉了一个literal
+            } 
             else
             {
                 Clause &c = *r.clause();
@@ -485,8 +485,8 @@ bool Solver::enqueue(Lit p, GClause from)
     if (value(p) != l_Undef)
         return value(p) != l_False;
     else
-    {
-        assigns[var(p)] = toInt(lbool(!sign(p)));
+    {   // 所以assign +1就是var=T，-1就是var=F，0就是还没assign
+        assigns[var(p)] = toInt(lbool(!sign(p)));// litp=2->sign(p)=false->lbool.value=2*1-1=1->toInt(lbool)=1; litp=3, assign[1]=-1
         level[var(p)] = decisionLevel();
         reason[var(p)] = from;
         trail.push(p);
@@ -520,9 +520,9 @@ Clause *Solver::propagate()
         for (i = j = (GClause *)ws, end = i + ws.size(); i != end;)
         {
             if (i->isLit())
-            {
+            {   // binary clause case: 如果发现第二个lit已经是False了，那就找到conflict了
                 if (!enqueue(i->lit(), GClause_new(p)))
-                {
+                {   
                     if (decisionLevel() == 0)
                         ok = false;
                     confl = propagate_tmpbin;
@@ -535,7 +535,7 @@ Clause *Solver::propagate()
                         *j++ = *i++;
                 }
                 else
-                    *j++ = *i++;
+                    *j++ = *i++;   
             }
             else
             {

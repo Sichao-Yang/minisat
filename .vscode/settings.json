@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "Main.C": "cpp",
+        "Solver.C": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "random": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp"
+    }
+}
