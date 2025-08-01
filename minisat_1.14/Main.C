@@ -163,10 +163,10 @@ template <class B> static void readClause(B &in, Solver &S, vec<Lit> &lits)
     lits.clear();
     for (;;)
     {
-        parsed_lit = parseInt(in);  // input: '-1', parsed_lit: -1
+        parsed_lit = parseInt(in);  // input: char *'-1', parsed_lit: int -1
         if (parsed_lit == 0)
             break;
-        var = abs(parsed_lit) - 1; //  -1 -> var0, 5 -> var4
+        var = abs(parsed_lit) - 1; // DIMACS是index1的，minisat是index0的，所以这里减1：-1 -> var0, 5 -> var4
         while (var >= S.nVars())
             S.newVar();
         lits.push((parsed_lit > 0) ? Lit(var)
