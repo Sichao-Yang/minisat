@@ -269,7 +269,7 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
 
     // Generate conflict clause:
     //
-    out_learnt.push(); // (leave room for the asserting literal, asserting literal is the last UIP)
+    out_learnt.push(); // (leave room for the asserting literal, asserting literal is the first UIP)
     out_btlevel = 0;
     int index = trail.size() - 1;
     do
@@ -279,7 +279,10 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
         Clause &c = confl.isLit() ? ((*analyze_tmpbin)[1] = confl.lit(), *analyze_tmpbin) : *confl.clause();
         if (c.learnt())
             claBumpActivity(&c);
-        // p starts with lit_Undef but after reason it will not be undefined 当p被赋值的时候其实就是开始做resolve了，第0个是需要被resolve的那个当前d level上的trail最后的那个literal，所以这里跳过的意思就是说明它已经被跳过了
+        // p starts with lit_Undef but after reason it will not be undefined 
+        // 一开始p=undef的时候，conf是没有被resolve的原始的failed clause，这时候里面的每一个literal都要被check
+        // 而当第二轮，p有值了也是因为在resolve上1轮的某个literal（当前d level的trail的最后一个literal）这个literal就是第0个元素，
+        // 所以这里直接从第1个开始收集的意思就是对第0个元素完成了resolve
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++)
         {
             Lit q = c[j];
@@ -306,11 +309,12 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
         p = trail[index + 1]; // add 1 here is just to be compatible with 'index--'
         // var(p) can only take one value when enqueued, therefore reason's size is |var| not |lit|
         confl = reason[var(p)];
-        // set back to zero why? 因为这个p就相当于会被消掉了
+        // set back to zero why? seen代表了simplify前的resolve后的conflict clause的所有literals对应的var，因为这个p会在下一轮被resolve掉，所以这里消掉
         seen[var(p)] = 0;
-        pathC--; // everytime, a falsified var is removed by tracing its opposite value (unit propogated) on trail，如果只有一个falsified var了，那就已经到达UIP了，这边--后就会等于0，达到退出条件
+        pathC--; // everytime, a falsified var is removed by tracing its opposite value (unit propogated) on trail
         // once all causal lits from level above expect one(unit propogated from current level) are found,
-        // the loop terminates with the last UIP saved in p
+        // the loop terminates with the last UIP saved in p (这里说的last是指循环的最后一个p的赋值，但实际上返回的是back-resolve的first UIP)
+        // 如果只有一个falsified var了，那就已经到达UIP了，这边--后就会等于0，达到退出条件
     } while (pathC > 0);
     out_learnt[0] = ~p; // reverse this lit to void future conflict，uip的点需要被翻转，才能避免下次再犯
 
@@ -332,7 +336,9 @@ void Solver::analyze(Clause *_confl, vec<Lit> &out_learnt, int &out_btlevel)
     else
     {
         // Simplify conflict clause (a little):
-        // 论文里提到的conflict clause minimization
+        /* 论文里提到的基本款conflict clause minimization：
+        从元素1开始循环冲突子句的每个literal（元素0是要unite propagate的，其他lit元素都是已知False的），取出该lit的reson（存的肯定是该lit的反的原因clause）
+        如果从元素1开始的每个元素都被out_learnt包含，那就说明out_learnt是被该新clause subsume的，可以让out_learnt减少了1个lit */
         out_learnt.copyTo(analyze_toclear);
         for (i = j = 1; i < out_learnt.size(); i++)
         {
@@ -650,7 +656,7 @@ void Solver::simplifyDB()
     }
 
     if (nAssigns() == simpDB_assigns ||
-        simpDB_props > 0) // (nothing has changed or preformed a simplification too recently)
+        simpDB_props > 0) // (nothing has changed or preformed a simplification too recently(simpDB_props初始值是0，在该函数里会被赋值成大于零的数))
         return;
 
     // Clear watcher lists:
